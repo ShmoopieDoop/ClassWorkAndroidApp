@@ -5,6 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -82,7 +83,7 @@ public class DBHelper extends SQLiteOpenHelper {
     }
 
     @NonNull
-    private static User getCurrentUser(Cursor cursor) {
+    public static User getCurrentUser(Cursor cursor) {
         User u;
         u = new User();
         u.setId(cursor.getString((int) cursor.getColumnIndex (userId)));
@@ -117,6 +118,34 @@ public class DBHelper extends SQLiteOpenHelper {
         }
         return null;
 
+    }
+    
+    public Boolean confirmCredentials(String username, String password) {
+        SQLiteDatabase sqdb = this.getReadableDatabase();
+        Cursor cursor = sqdb.query(tableName, null,
+                DBHelper.userName + "= ? AND " + DBHelper.userPassword + "= ?"
+                , new String[] {username, password}, null, null, null, null);
+        cursor.moveToFirst();
+        Boolean result = cursor.getCount() != 0;
+        cursor.close();
+        sqdb.close();
+        return result;
+    }
+    
+    public Boolean updateCredentials(String username, String oldPassword, String newPassword) {
+        if (!confirmCredentials(username, oldPassword)) {
+            return false;
+        }
+        
+        SQLiteDatabase sqdb  = this.getWritableDatabase();
+        
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(userPassword, newPassword);
+        
+        sqdb.update(tableName, contentValues, userName + "= ?" + userPassword + "= ?", new String[] {username, oldPassword});
+        
+        sqdb.close();
+        return true;
     }
 
 
