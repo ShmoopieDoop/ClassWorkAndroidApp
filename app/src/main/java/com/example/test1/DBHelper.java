@@ -142,8 +142,7 @@ public class DBHelper extends SQLiteOpenHelper {
         ContentValues contentValues = new ContentValues();
         contentValues.put(userPassword, newPassword);
         
-        sqdb.update(tableName, contentValues, userName + "= ?" + userPassword + "= ?", new String[] {username, oldPassword});
-        
+        sqdb.update(tableName, contentValues, userName + "=? AND " + userPassword + "=?", new String[] {username, oldPassword});
         sqdb.close();
         return true;
     }
